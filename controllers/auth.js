@@ -99,7 +99,16 @@ exports.isAdmin = (req, res, next) => {
 exports.isInfluencer = (req, res, next) => {
   if (req.profile.role === "0" || req.profile.role === "2") {
     return res.status(403).json({
-      error: "Only influencers can add products, Access denied",
+      error: "Influencer resource, Access denied",
+    });
+  }
+  next();
+};
+
+exports.isCustomer = (req, res, next) => {
+  if (req.profile.role === "0" || req.profile.role === "1") {
+    return res.status(403).json({
+      error: "Customer resource. Access denied",
     });
   }
   next();

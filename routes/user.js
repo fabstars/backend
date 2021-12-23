@@ -1,7 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const { requireSignin, isAuth, isInfluencer } = require("../controllers/auth");
+const {
+  requireSignin,
+  isAuth,
+  isInfluencer,
+  isCustomer,
+} = require("../controllers/auth");
 
 const {
   userById,
@@ -12,8 +17,19 @@ const {
   fetchInfluencerProducts,
 } = require("../controllers/user");
 
+// User information
 router.get("/user/:userId", requireSignin, isAuth, read);
-router.get("/orders/by/user/:userId", requireSignin, isAuth, purchaseHistory);
+
+// Purchase history of customer
+router.get(
+  "/orders/by/user/:userId",
+  requireSignin,
+  isAuth,
+  isCustomer,
+  purchaseHistory
+);
+
+// Influencer products added to his shop
 router.get(
   "/user/influencer/:userId/my-products",
   requireSignin,
@@ -22,8 +38,10 @@ router.get(
   fetchInfluencerProducts
 );
 
+// Updating user information
 router.put("/user/:userId", requireSignin, isAuth, update);
 
+// Adding products to influencer's shop
 router.post(
   "/user/influencer/:userId/add-product",
   requireSignin,

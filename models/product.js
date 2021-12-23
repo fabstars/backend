@@ -40,7 +40,15 @@ const productSchema = new mongoose.Schema(
       required: false,
       type: Boolean,
     },
-    influencer_list: [{ type: ObjectId, ref: "User" }],
+    influencer_list: [
+      {
+        user_id: {
+          type: ObjectId,
+          ref: "User",
+        },
+        margin: { type: Number, default: 0, required: true },
+      },
+    ],
   },
   { timestamps: true }
 );

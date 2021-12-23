@@ -127,10 +127,14 @@ exports.addInfluencerProducts = async (req, res) => {
   for (const productId of products) {
     let current_product = await Product.findById(productId);
     const userIndex = current_product.influencer_list
-      .map((id) => id)
+      .map((user) => user.user_id)
       .indexOf(req.profile._id);
     if (userIndex === -1) {
-      current_product.influencer_list.push(req.profile._id);
+      const obj = {
+        user_id: req.profile._id,
+        margin: 0,
+      };
+      current_product.influencer_list.push(obj);
       await current_product.save();
     }
   }
@@ -144,12 +148,16 @@ exports.fetchInfluencerProducts = async (req, res) => {
   const allProducts = await Product.find();
   allProducts.map((product, idx) => {
     const userIdx = product.influencer_list
-      .map((id) => id)
+      .map((user) => user.user_id)
       .indexOf(req.profile._id);
     if (userIdx !== -1) {
+      // update the price based on the margin specified by the current user
+      // do this in the front end price += margin
+      // different for every influencer
       products.push(product);
     }
     if (idx == allProducts.length - 1) {
+      console.log(products.length);
       return res.json(products);
     }
   });
