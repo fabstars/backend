@@ -145,7 +145,7 @@ exports.addInfluencerProducts = async (req, res) => {
 
 exports.fetchInfluencerProducts = async (req, res) => {
   let products = [];
-  const allProducts = await Product.find();
+  const allProducts = await Product.find().populate("category");
   allProducts.map((product, idx) => {
     const userIdx = product.influencer_list
       .map((user) => user.user_id)
@@ -154,6 +154,7 @@ exports.fetchInfluencerProducts = async (req, res) => {
       // update the price based on the margin specified by the current user
       // do this in the front end price += margin
       // different for every influencer
+
       products.push(product);
     }
     if (idx == allProducts.length - 1) {
