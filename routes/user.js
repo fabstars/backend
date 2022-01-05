@@ -30,13 +30,7 @@ router.get(
 );
 
 // Influencer products added to his shop
-router.get(
-  "/user/influencer/:userId/my-products",
-  requireSignin,
-  isAuth,
-  isInfluencer,
-  fetchInfluencerProducts
-);
+router.get("/user/influencer/:userId/my-products", fetchInfluencerProducts);
 
 // Updating user information
 router.put("/user/:userId", requireSignin, isAuth, update);
