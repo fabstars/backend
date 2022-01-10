@@ -139,7 +139,24 @@ exports.addInfluencerProducts = async (req, res) => {
     }
   }
   res.json({
-    message: "Products added successfully",
+    message: "Product added successfully",
+  });
+};
+
+exports.deleteInfluencerProduct = async (req, res) => {
+  const products = req.body.products;
+  for (const productId of products) {
+    let current_product = await Product.findById(productId);
+    const userIndex = current_product.influencer_list
+      .map((user) => user.user_id)
+      .indexOf(req.profile._id);
+    if (userIndex !== -1) {
+      current_product.influencer_list.splice(userIndex, 1);
+      await current_product.save();
+    }
+  }
+  res.json({
+    message: "Product removed successfully",
   });
 };
 
@@ -163,3 +180,6 @@ exports.fetchInfluencerProducts = async (req, res) => {
     }
   });
 };
+
+// highlightedlink
+// social urls

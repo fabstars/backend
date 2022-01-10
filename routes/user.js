@@ -15,6 +15,7 @@ const {
   purchaseHistory,
   addInfluencerProducts,
   fetchInfluencerProducts,
+  deleteInfluencerProduct
 } = require("../controllers/user");
 
 // User information
@@ -42,6 +43,15 @@ router.post(
   isAuth,
   isInfluencer,
   addInfluencerProducts
+);
+
+// Deleting products from influencer's shop
+router.post(
+  "/user/influencer/:userId/delete-product",
+  requireSignin,
+  isAuth,
+  isInfluencer,
+  deleteInfluencerProduct
 );
 
 router.param("userId", userById);
