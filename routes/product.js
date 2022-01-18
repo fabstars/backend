@@ -78,3 +78,9 @@ router.param("userId", userById);
 router.param("productId", productById);
 
 module.exports = router;
+
+// mrp - max price of product after margin
+// description: {} - optional
+
+// store title
+// otp - customer

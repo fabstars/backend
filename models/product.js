@@ -20,6 +20,12 @@ const productSchema = new mongoose.Schema(
       required: true,
       maxlength: 32,
     },
+    mrp: {
+      type: Number,
+      trim: true,
+      required: true,
+      maxlength: 32,
+    },
     category: {
       type: ObjectId,
       ref: "Category",
