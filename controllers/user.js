@@ -37,8 +37,16 @@ exports.read = (req, res) => {
 // };
 
 exports.update = (req, res) => {
-  const { name, password, twitter, facebook, linkedin, youtube, instagram } =
-    req.body;
+  const {
+    name,
+    password,
+    twitter,
+    facebook,
+    linkedin,
+    youtube,
+    instagram,
+    store_name,
+  } = req.body;
 
   User.findOne({ _id: req.profile._id }, (err, user) => {
     if (err || !user) {
@@ -70,6 +78,8 @@ exports.update = (req, res) => {
     if (facebook) user.social.facebook = facebook;
     if (instagram) user.social.instagram = instagram;
     if (linkedin) user.social.linkedin = linkedin;
+
+    user.store_name = store_name;
 
     user.save((err, updatedUser) => {
       if (err) {

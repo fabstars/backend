@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       maxlength: 32,
     },
+    store_name: {
+      type: String,
+      default: "My Store",
+    },
     email: {
       type: String,
       trim: true,
