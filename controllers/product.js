@@ -229,6 +229,8 @@ exports.listBySearch = (req, res) => {
           $gte: req.body.filters[key][0],
           $lte: req.body.filters[key][1],
         };
+      } else if (key === "search") {
+        findArgs["name"] = { $regex: req.body.filters[key], $options: "i" };
       } else {
         findArgs[key] = req.body.filters[key];
       }
@@ -265,24 +267,28 @@ exports.photo = (req, res, next) => {
 exports.listSearch = (req, res) => {
   // create query object to hold search value and category value
   const query = {};
+  let search = req.query.search;
   // assign search value to query.name
-  if (req.query.search) {
-    query.name = { $regex: req.query.search, $options: "i" };
-    // assigne category value to query.category
-    if (req.query.category && req.query.category != "All") {
-      query.category = req.query.category;
-    }
-    // find the product based on query object with 2 properties
-    // search and category
-    Product.find(query, (err, products) => {
-      if (err) {
-        return res.status(400).json({
-          error: errorHandler(err),
-        });
-      }
-      res.json(products);
-    }).select("-photo");
+  if (!search) {
+    search = "";
   }
+  query.name = { $regex: search, $options: "i" };
+  // assigne category value to query.category
+  if (req.query.category && req.query.category != "All") {
+    query.category = req.query.category;
+  }
+  // find the product based on query object with 2 properties
+  // search and category
+  Product.find(query, (err, products) => {
+    if (err) {
+      return res.status(400).json({
+        error: errorHandler(err),
+      });
+    }
+    res.json(products);
+  })
+    .select("-photo")
+    .populate("category");
 };
 
 exports.decreaseQuantity = (req, res, next) => {
