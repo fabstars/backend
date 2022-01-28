@@ -15,8 +15,12 @@ const {
   purchaseHistory,
   addInfluencerProducts,
   fetchInfluencerProducts,
-  deleteInfluencerProduct
+  deleteInfluencerProduct,
+  getUserById
 } = require("../controllers/user");
+
+// User by id
+router.get("/user/by/:userId/", getUserById)
 
 // User information
 router.get("/user/:userId", requireSignin, isAuth, read);

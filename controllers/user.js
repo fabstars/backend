@@ -15,6 +15,20 @@ exports.userById = (req, res, next, id) => {
   });
 };
 
+exports.getUserById = (req, res) => {
+  const id = req.params.userId;
+  User.findById(id).exec((err, user) => {
+    if (err || !user) {
+      return res.status(400).json({
+        error: "User not found",
+      });
+    }
+    user.hashed_password = undefined;
+    user.salt = undefined;
+    return res.status(200).json(user);
+  });
+};
+
 exports.read = (req, res) => {
   req.profile.hashed_password = undefined;
   req.profile.salt = undefined;
