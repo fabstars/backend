@@ -37,6 +37,16 @@ const userSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+    highlightLinks: [
+      {
+        text: {
+          type: String,
+        },
+        url: {
+          type: String,
+        },
+      },
+    ],
     social: {
       youtube: {
         type: String,

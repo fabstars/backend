@@ -3,6 +3,7 @@ const _ = require("lodash");
 const fs = require("fs");
 const Product = require("../models/product");
 const { errorHandler } = require("../helpers/dbErrorHandler");
+const Category = require("../models/category");
 
 exports.productById = (req, res, next, id) => {
   Product.findById(id)
@@ -26,25 +27,16 @@ exports.read = (req, res) => {
 exports.create = (req, res) => {
   let form = new formidable.IncomingForm();
   form.keepExtensions = true;
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) {
       return res.status(400).json({
         error: "Image could not be uploaded",
       });
     }
     // check for all fields
-    const { name, description, price, category, quantity, shipping, mrp } =
-      fields;
+    const { name, description, price, category, mrp } = fields;
 
-    if (
-      !name ||
-      !description ||
-      !price ||
-      !category ||
-      !quantity ||
-      !shipping ||
-      !mrp
-    ) {
+    if (!name || !description || !price || !category || !mrp) {
       return res.status(400).json({
         error: "All fields are required",
       });
@@ -64,6 +56,14 @@ exports.create = (req, res) => {
       }
       product.photo.data = fs.readFileSync(files.photo.path);
       product.photo.contentType = files.photo.type;
+    }
+
+    product.sub_types = [];
+
+    const curCategory = await Category.findById(category);
+
+    for (const type of curCategory.sub_types) {
+      product.sub_types.push({ sub_type: type._id });
     }
 
     product.save((err, result) => {

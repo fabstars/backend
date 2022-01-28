@@ -31,9 +31,13 @@ const productSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
-    quantity: {
-      type: Number,
-    },
+    sub_types: [
+      {
+        sub_type: {
+          type: ObjectId,
+        },
+      },
+    ],
     sold: {
       type: Number,
       default: 0,
@@ -41,10 +45,6 @@ const productSchema = new mongoose.Schema(
     photo: {
       data: Buffer,
       contentType: String,
-    },
-    shipping: {
-      required: false,
-      type: Boolean,
     },
     influencer_list: [
       {

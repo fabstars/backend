@@ -46,6 +46,7 @@ exports.update = (req, res) => {
     youtube,
     instagram,
     store_name,
+    highlightLinks,
   } = req.body;
 
   User.findOne({ _id: req.profile._id }, (err, user) => {
@@ -80,6 +81,8 @@ exports.update = (req, res) => {
     if (linkedin) user.social.linkedin = linkedin;
 
     user.store_name = store_name;
+
+    user.highlightLinks = highlightLinks;
 
     user.save((err, updatedUser) => {
       if (err) {
