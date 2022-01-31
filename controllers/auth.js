@@ -13,33 +13,15 @@ exports.signup = (req, res) => {
         error: "Email is taken",
       });
     }
-    user.salt = undefined;
-    user.hashed_password = undefined;
-    res.json({
-      user,
-    });
+    // generate a signed token with user id and secret
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+    // persist the token as 't' in cookie with expiry date
+    res.cookie("t", token, { expire: new Date() + 9999 });
+    // return response with user and token to frontend client
+    const { _id, name, email, role } = user;
+    return res.json({ token, user: { _id, email, name, role } });
   });
 };
-
-// using async/await
-// exports.signup = async (req, res) => {
-//     try {
-//         const user = await new User(req.body);
-//         console.log(req.body);
-
-//         await user.save((err, user) => {
-//             if (err) {
-//                 // return res.status(400).json({ err });
-//                 return res.status(400).json({
-//                     error: 'Email is taken'
-//                 });
-//             }
-//             res.status(200).json({ user });
-//         });
-//     } catch (err) {
-//         console.error(err.message);
-//     }
-// };
 
 exports.signin = (req, res) => {
   // find the user based on email
