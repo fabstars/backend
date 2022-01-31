@@ -158,23 +158,26 @@ exports.purchaseHistory = (req, res) => {
 
 exports.addInfluencerProducts = async (req, res) => {
   const products = req.body.products;
-  for (const productId of products) {
-    let current_product = await Product.findById(productId);
-    const userIndex = current_product.influencer_list
-      .map((user) => user.user_id)
-      .indexOf(req.profile._id);
-    if (userIndex === -1) {
-      const obj = {
-        user_id: req.profile._id,
-        margin: 0,
-      };
-      current_product.influencer_list.push(obj);
-      await current_product.save();
-    }
+  const productId = products[0];
+  let current_product = await Product.findById(productId);
+  const userIndex = current_product.influencer_list
+    .map((user) => user.user_id)
+    .indexOf(req.profile._id);
+  if (userIndex === -1) {
+    const obj = {
+      user_id: req.profile._id,
+      margin: 0,
+    };
+    current_product.influencer_list.push(obj);
+    await current_product.save();
+    return res.json({
+      message: "Product added successfully",
+    });
+  } else {
+    return res.json({
+      message: "Product exists on your site",
+    });
   }
-  res.json({
-    message: "Product added successfully",
-  });
 };
 
 exports.deleteInfluencerProduct = async (req, res) => {
