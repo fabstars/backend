@@ -55,6 +55,9 @@ const productSchema = new mongoose.Schema(
         margin: { type: Number, default: 0, required: true },
       },
     ],
+    url: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
