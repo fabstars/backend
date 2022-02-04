@@ -49,6 +49,22 @@ exports.signin = (req, res) => {
   });
 };
 
+exports.signinGoogle = async (req, res) => {
+  const { result } = req.body;
+  const email = result.email;
+  const users = await User.find({ email });
+  if (users.length) {
+    const { _id, name, email, role } = users[0];
+    const token = jwt.sign({ _id: _id }, process.env.JWT_SECRET);
+    res.cookie("t", token, { expire: new Date() + 9999 });
+    return res.json({ token, user: { _id, email, name, role } });
+  } else
+    return res.json({
+      error:
+        "There is no active account associated with that email account. Would you like to Sign Up?",
+    });
+};
+
 exports.signout = (req, res) => {
   res.clearCookie("t");
   res.json({ message: "Signout success" });
