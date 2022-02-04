@@ -7,10 +7,12 @@ const {
   signout,
   requireSignin,
   signinGoogle,
+  signupGoogle
 } = require("../controllers/auth");
 const { userSignupValidator } = require("../validator");
 
 router.post("/signup", userSignupValidator, signup);
+router.post("/signup/google", signupGoogle)
 router.post("/signin", signin);
 router.post("/signin/google", signinGoogle);
 router.get("/signout", signout);
