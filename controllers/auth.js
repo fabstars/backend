@@ -70,8 +70,8 @@ exports.signin = (req, res) => {
     // persist the token as 't' in cookie with expiry date
     res.cookie("t", token, { expire: new Date() + 9999 });
     // return response with user and token to frontend client
-    const { _id, name, email, role, url} = user;
-    return res.json({ token, user: { _id, email, name, role, url} });
+    const { _id, name, email, role, url } = user;
+    return res.json({ token, user: { _id, email, name, role, url } });
   });
 };
 
@@ -84,7 +84,9 @@ exports.signinGoogle = async (req, res) => {
     const { _id, name, email, role } = users[0];
     const token = jwt.sign({ _id: _id }, process.env.JWT_SECRET);
     res.cookie("t", token, { expire: new Date() + 9999 });
-    const url = result.imageUrl;
+    var url;
+    if (users[0].url === "") url = result.imageUrl;
+    else url = users[0].url;
     return res.json({ token, user: { _id, email, name, role, url } });
   } else
     return res.json({

@@ -2,6 +2,9 @@ const User = require("../models/user");
 const { Order } = require("../models/order");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const Product = require("../models/product");
+const { cloudinary } = require("./cloudinary");
+const formidable = require("formidable");
+const fs = require("fs");
 
 exports.userById = (req, res, next, id) => {
   User.findById(id).exec((err, user) => {
@@ -50,64 +53,89 @@ exports.read = (req, res) => {
 //     });
 // };
 
-exports.update = (req, res) => {
-  const {
-    name,
-    password,
-    twitter,
-    facebook,
-    linkedin,
-    youtube,
-    instagram,
-    store_name,
-    highlightLinks,
-  } = req.body;
-
-  User.findOne({ _id: req.profile._id }, (err, user) => {
-    if (err || !user) {
+exports.update = async (req, res) => {
+  let form = new formidable.IncomingForm();
+  form.keepExtensions = true;
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.log(err);
       return res.status(400).json({
-        error: "User not found",
+        error: "Something went wrong. Please try again",
       });
     }
-    if (!name) {
-      return res.status(400).json({
-        error: "Name is required",
-      });
-    } else {
-      user.name = name;
-    }
-
-    if (password) {
-      if (password.length < 6) {
+    const {
+      name,
+      password,
+      twitter,
+      facebook,
+      linkedin,
+      youtube,
+      instagram,
+      store_name,
+      highlightLinks,
+    } = fields;
+    User.findOne({ _id: req.profile._id }, async (err, user) => {
+      if (err || !user) {
         return res.status(400).json({
-          error: "Password should be min 6 characters long",
+          error: "User not found",
+        });
+      }
+      if (!name) {
+        return res.status(400).json({
+          error: "Name is required",
         });
       } else {
-        user.password = password;
+        user.name = name;
       }
-    }
 
-    user.social = {};
-    if (youtube) user.social.youtube = youtube;
-    if (twitter) user.social.twitter = twitter;
-    if (facebook) user.social.facebook = facebook;
-    if (instagram) user.social.instagram = instagram;
-    if (linkedin) user.social.linkedin = linkedin;
-
-    user.store_name = store_name;
-
-    user.highlightLinks = highlightLinks;
-
-    user.save((err, updatedUser) => {
-      if (err) {
-        console.log("USER UPDATE ERROR", err);
-        return res.status(400).json({
-          error: "User update failed",
-        });
+      if (password) {
+        if (password.length < 6) {
+          return res.status(400).json({
+            error: "Password should be min 6 characters long",
+          });
+        } else {
+          user.password = password;
+        }
       }
-      updatedUser.hashed_password = undefined;
-      updatedUser.salt = undefined;
-      res.json(updatedUser);
+
+      user.social = {};
+      if (youtube) user.social.youtube = youtube;
+      if (twitter) user.social.twitter = twitter;
+      if (facebook) user.social.facebook = facebook;
+      if (instagram) user.social.instagram = instagram;
+      if (linkedin) user.social.linkedin = linkedin;
+
+      user.store_name = store_name;
+
+      user.highlightLinks = JSON.parse(highlightLinks);
+
+      if (files.url) {
+        // console.log(files);
+        try {
+          var myImg = fs.readFileSync(files.url.path, "base64");
+          myImg = "data:" + files.url.type + ";base64," + myImg;
+          const uploadedResponse = await cloudinary.uploader.upload(myImg, {
+            upload_preset: "q9pohyai",
+          });
+          console.log(uploadedResponse);
+          user.url = uploadedResponse.url;
+        } catch (error) {
+          console.log(error);
+          console.log("Unable to upload");
+        }
+      }
+
+      user.save((err, updatedUser) => {
+        if (err) {
+          console.log("USER UPDATE ERROR", err);
+          return res.status(400).json({
+            error: "User update failed",
+          });
+        }
+        updatedUser.hashed_password = undefined;
+        updatedUser.salt = undefined;
+        res.json(updatedUser);
+      });
     });
   });
 };

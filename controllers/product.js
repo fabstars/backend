@@ -31,7 +31,7 @@ exports.create = async (req, res) => {
   form.parse(req, async (err, fields, files) => {
     if (err) {
       return res.status(400).json({
-        error: "Image could not be uploaded",
+        error: "Something went wrong. Please try again",
       });
     }
     // check for all fields
@@ -79,7 +79,6 @@ exports.create = async (req, res) => {
     for (const type of curCategory.sub_types) {
       product.sub_types.push({ sub_type: type._id });
     }
-
 
     product.save((err, result) => {
       if (err) {
