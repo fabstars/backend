@@ -28,7 +28,8 @@ exports.signupGoogle = async (req, res) => {
   const myUser = {
     name: result.name,
     email: result.email,
-    password: "123456"
+    password: "123456",
+    url: result.imageUrl,
   };
   const user = new User(myUser);
   user.save((err, user) => {
@@ -43,8 +44,8 @@ exports.signupGoogle = async (req, res) => {
     // persist the token as 't' in cookie with expiry date
     res.cookie("t", token, { expire: new Date() + 9999 });
     // return response with user and token to frontend client
-    const { _id, name, email, role } = user;
-    return res.json({ token, user: { _id, email, name, role } });
+    const { _id, name, email, role, url } = user;
+    return res.json({ token, user: { _id, email, name, role, url } });
   });
 };
 
@@ -69,20 +70,22 @@ exports.signin = (req, res) => {
     // persist the token as 't' in cookie with expiry date
     res.cookie("t", token, { expire: new Date() + 9999 });
     // return response with user and token to frontend client
-    const { _id, name, email, role } = user;
-    return res.json({ token, user: { _id, email, name, role } });
+    const { _id, name, email, role, url} = user;
+    return res.json({ token, user: { _id, email, name, role, url} });
   });
 };
 
 exports.signinGoogle = async (req, res) => {
   const { result } = req.body;
+  console.log(result);
   const email = result.email;
   const users = await User.find({ email });
   if (users.length) {
     const { _id, name, email, role } = users[0];
     const token = jwt.sign({ _id: _id }, process.env.JWT_SECRET);
     res.cookie("t", token, { expire: new Date() + 9999 });
-    return res.json({ token, user: { _id, email, name, role } });
+    const url = result.imageUrl;
+    return res.json({ token, user: { _id, email, name, role, url } });
   } else
     return res.json({
       error:
