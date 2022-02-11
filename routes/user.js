@@ -16,11 +16,16 @@ const {
   addInfluencerProducts,
   fetchInfluencerProducts,
   deleteInfluencerProduct,
-  getUserById
+  getUserById,
+  getUserBySlug,
+  fetchInfluencerProductsBySlug
 } = require("../controllers/user");
 
 // User by id
 router.get("/user/by/:userId/", getUserById)
+
+// User by id
+router.get("/user/by/slug/:slug/", getUserBySlug)
 
 // User information
 router.get("/user/:userId", requireSignin, isAuth, read);
@@ -36,6 +41,9 @@ router.get(
 
 // Influencer products added to his shop
 router.get("/user/influencer/:userId/my-products", fetchInfluencerProducts);
+
+// Influencer products added to his shop
+router.get("/user/influencer/slug/:slug/my-products", fetchInfluencerProductsBySlug);
 
 // Updating user information
 router.put("/user/:userId", requireSignin, isAuth, update);

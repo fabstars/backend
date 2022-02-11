@@ -32,6 +32,25 @@ exports.getUserById = (req, res) => {
   });
 };
 
+exports.getUserBySlug = (req, res) => {
+  const slug = req.params.slug;
+  User.find({ slug }).exec((err, user) => {
+    if (err) {
+      return res.status(400).json({
+        error: "User not found",
+      });
+    }
+    if (user.length === 0) {
+      return res.status(400).json({
+        error: "User not found",
+      });
+    }
+    user[0].hashed_password = undefined;
+    user[0].salt = undefined;
+    return res.status(200).json(user[0]);
+  });
+};
+
 exports.read = (req, res) => {
   req.profile.hashed_password = undefined;
   req.profile.salt = undefined;
@@ -73,6 +92,7 @@ exports.update = async (req, res) => {
       instagram,
       store_name,
       highlightLinks,
+      slug,
     } = fields;
     User.findOne({ _id: req.profile._id }, async (err, user) => {
       if (err || !user) {
@@ -96,6 +116,25 @@ exports.update = async (req, res) => {
         } else {
           user.password = password;
         }
+      }
+
+      if (slug !== "") {
+        const users = await User.find({ slug });
+
+        for (var i = 0; i < users.length; i++) {
+          const current_user = users[i];
+          if (JSON.stringify(current_user._id) !== JSON.stringify(user._id)) {
+            return res.status(400).json({
+              error: "Username already exists",
+            });
+          }
+        }
+
+        user.slug = slug;
+      } else {
+        return res.status(400).json({
+          error: "Username cannot be empty",
+        });
       }
 
       user.social = {};
@@ -245,6 +284,27 @@ exports.fetchInfluencerProducts = async (req, res) => {
     }
   });
 };
+
+exports.fetchInfluencerProductsBySlug = async (req, res) => {
+  // let products = [];
+  // const allProducts = await Product.find().populate("category");
+  // allProducts.map((product, idx) => {
+  //   const userIdx = product.influencer_list
+  //     .map((user) => user.user_id)
+  //     .indexOf(req.profile._id);
+  //   if (userIdx !== -1) {
+  //     // update the price based on the margin specified by the current user
+  //     // do this in the front end price += margin
+  //     // different for every influencer
+
+  //     products.push(product);
+  //   }
+  //   if (idx == allProducts.length - 1) {
+  //     console.log(products.length);
+  //     return res.json(products);
+  //   }
+  // });
+}
 
 // highlightedlink
 // social urls

@@ -4,7 +4,17 @@ const expressJwt = require("express-jwt"); // for authorization check
 const { errorHandler } = require("../helpers/dbErrorHandler");
 
 // using promise
-exports.signup = (req, res) => {
+exports.signup = async (req, res) => {
+  const { slug } = req.body;
+  const users = await User.find({ slug });
+  for (var i = 0; i < users.length; i++) {
+    const current_user = users[i];
+    if (current_user.slug === slug) {
+      return res.status(400).json({
+        error: "Username already exists",
+      });
+    }
+  }
   const user = new User(req.body);
   user.save((err, user) => {
     if (err) {
@@ -19,7 +29,7 @@ exports.signup = (req, res) => {
     res.cookie("t", token, { expire: new Date() + 9999 });
     // return response with user and token to frontend client
     const { _id, name, email, role } = user;
-    return res.json({ token, user: { _id, email, name, role } });
+    return res.json({ token, user: { _id, email, name, role, slug } });
   });
 };
 
@@ -70,8 +80,8 @@ exports.signin = (req, res) => {
     // persist the token as 't' in cookie with expiry date
     res.cookie("t", token, { expire: new Date() + 9999 });
     // return response with user and token to frontend client
-    const { _id, name, email, role, url } = user;
-    return res.json({ token, user: { _id, email, name, role, url } });
+    const { _id, name, email, role, url, slug } = user;
+    return res.json({ token, user: { _id, email, name, role, url, slug } });
   });
 };
 

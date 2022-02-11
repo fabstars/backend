@@ -14,6 +14,7 @@ const {
   getStatusValues,
   orderById,
   updateOrderStatus,
+  createOrderCashfree
 } = require("../controllers/order");
 const { decreaseQuantity } = require("../controllers/product");
 
@@ -26,6 +27,16 @@ router.post(
   decreaseQuantity,
   isCustomer,
   create
+);
+
+router.post(
+  "/order/cashfree/create/:userId",
+  requireSignin,
+  isAuth,
+  addOrderToUserHistory,
+  decreaseQuantity,
+  isCustomer,
+  createOrderCashfree
 );
 
 // Fetching all orders by a user

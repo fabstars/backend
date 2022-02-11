@@ -68,6 +68,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    slug: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );
