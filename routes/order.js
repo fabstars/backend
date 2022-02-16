@@ -14,18 +14,15 @@ const {
   getStatusValues,
   orderById,
   updateOrderStatus,
-  createOrderCashfree
+  createOrderCashfree,
 } = require("../controllers/order");
 const { decreaseQuantity } = require("../controllers/product");
 
 // Buying a product by the customer
 router.post(
-  "/order/create/:userId",
-  requireSignin,
-  isAuth,
+  "/order/create/:slug",
   addOrderToUserHistory,
   decreaseQuantity,
-  isCustomer,
   create
 );
 
