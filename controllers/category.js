@@ -22,13 +22,18 @@ exports.create = async (req, res) => {
       error: "Category already exists",
     });
   }
+
+  await Category.syncIndexes();
+
   const category = new Category(req.body);
   category.save((err, data) => {
     if (err) {
+      console.log(err);
       return res.status(400).json({
-        error: err._message,
+        error: "Unable to create category",
       });
     }
+    console.log(data);
     res.json({ data });
   });
 };
@@ -40,7 +45,7 @@ exports.read = (req, res) => {
 exports.update = (req, res) => {
   console.log("req.body", req.body);
   console.log("category update param", req.params.categoryId);
-  
+
   const category = req.category;
   category.name = req.body.name;
   category.save((err, data) => {
