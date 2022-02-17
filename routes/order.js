@@ -21,9 +21,7 @@ const { decreaseQuantity } = require("../controllers/product");
 
 // Buying a product by the customer
 router.post(
-  "/order/create/:userId",
-  requireSignin,
-  isAuth,
+  "/order/create/:slug",
   addOrderToUserHistory,
   isCustomer,
   create

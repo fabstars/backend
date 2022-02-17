@@ -5,6 +5,7 @@ const { PaymentGateway } = require("@cashfreepayments/cashfree-sdk");
 const formidable = require("formidable");
 const axios = require("axios");
 
+<<<<<<< HEAD
 exports.createOrderCashfree = async (req, res) => {
   const {
     orderAmount,
@@ -134,6 +135,9 @@ exports.viewOrder = (req, res) => {
       });
     });
 };
+=======
+exports.createOrderCashfree = (req, res) => {};
+>>>>>>> 680ac99503b0345760a09ec4ee806e470f395acb
 
 // sendgrid for email npm i @sendgrid/mail
 const sgMail = require("@sendgrid/mail");
@@ -157,6 +161,7 @@ exports.orderById = (req, res, next, id) => {
 
 exports.create = (req, res) => {
   console.log("CREATE ORDER: ", req.body);
+  res.status(200).send({ message: "Order Placed", order: req.body.order });
   // AppID: 172070f734837243d756e3e829070271
   // Secret Key: b10d7bcff1a767d79ae50b7b5bcf9f8e49ec5375
   // req.body.order.user = req.profile;

@@ -195,7 +195,7 @@ exports.addOrderToUserHistory = (req, res, next) => {
   });
 
   User.findOneAndUpdate(
-    { _id: req.profile._id },
+    { slug: req.body.order.creator },
     { $push: { history: history } },
     { new: true },
     (error, data) => {
@@ -296,7 +296,6 @@ exports.fetchInfluencerProductsBySlug = async (req, res) => {
   //     // update the price based on the margin specified by the current user
   //     // do this in the front end price += margin
   //     // different for every influencer
-
   //     products.push(product);
   //   }
   //   if (idx == allProducts.length - 1) {
@@ -304,7 +303,7 @@ exports.fetchInfluencerProductsBySlug = async (req, res) => {
   //     return res.json(products);
   //   }
   // });
-}
+};
 
 // highlightedlink
 // social urls
