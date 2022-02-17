@@ -5,7 +5,6 @@ const { PaymentGateway } = require("@cashfreepayments/cashfree-sdk");
 const formidable = require("formidable");
 const axios = require("axios");
 
-<<<<<<< HEAD
 exports.createOrderCashfree = async (req, res) => {
   const {
     orderAmount,
@@ -135,9 +134,6 @@ exports.viewOrder = (req, res) => {
       });
     });
 };
-=======
-exports.createOrderCashfree = (req, res) => {};
->>>>>>> 680ac99503b0345760a09ec4ee806e470f395acb
 
 // sendgrid for email npm i @sendgrid/mail
 const sgMail = require("@sendgrid/mail");
