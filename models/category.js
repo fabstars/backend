@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 
 const categorySchema = new mongoose.Schema(
   {
@@ -9,6 +10,13 @@ const categorySchema = new mongoose.Schema(
       maxlength: 32,
       unique: true,
     },
+    sub_types: [
+      {
+        sub_type: {
+          type: ObjectId,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
