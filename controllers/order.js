@@ -1,9 +1,138 @@
 const { Order, CartItem } = require("../models/order");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 var crypto = require("crypto");
+const { PaymentGateway } = require("@cashfreepayments/cashfree-sdk");
+const formidable = require("formidable");
+const axios = require("axios");
 
-exports.createOrderCashfree = (req, res) => {
-  
+exports.createOrderCashfree = async (req, res) => {
+  const {
+    orderAmount,
+    orderCurrency,
+    orderNote,
+    customerEmail,
+    customerName,
+    customerPhone,
+    customerId,
+  } = req.body;
+
+  const orderId = crypto.randomBytes(16).toString("hex");
+
+  Date.prototype.addHours = function (h) {
+    this.setHours(this.getHours() + h);
+    return this;
+  };
+
+  const expiry = new Date().addHours(4).toISOString();
+
+  const cashfree_options = {
+    url:
+      process.env.ENVIRONMENT === "DEV"
+        ? process.env.DEV_CASHFREE_URL
+        : process.env.PROD_CASHFREE_URL,
+    appid:
+      process.env.ENVIRONMENT === "DEV"
+        ? process.env.DEV_CASHFREE_APPID
+        : process.env.PROD_CASHFREE_APPID,
+    clientsecret:
+      process.env.ENVIRONMENT === "DEV"
+        ? process.env.DEV_CASHFREE_SECRET_KEY
+        : process.env.CASHFREE_SECRET_KEY,
+  };
+
+  const { url, appid, clientsecret } = cashfree_options;
+
+  const options = {
+    method: "POST",
+    url: url,
+    headers: {
+      Accept: "application/json",
+      "x-api-version": "2022-01-01",
+      "Content-Type": "application/json",
+      "x-client-id": appid,
+      "x-client-secret": clientsecret,
+    },
+    data: {
+      order_id: orderId,
+      order_amount: orderAmount,
+      order_currency: orderCurrency,
+      customer_details: {
+        customer_id: customerId,
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        // customer_bank_account_number: "1518121112",
+        // customer_bank_ifsc: "CITI0000001",
+        // customer_bank_code: 3333,
+        customer_name: customerName,
+      },
+      order_meta: {
+        return_url: `https://fabstores.co?order_id={order_id}&order_token={order_token}`,
+        notify_url: `https://fabstores.co?order_id={order_id}&order_token={order_token}`,
+      },
+      order_expiry_time: expiry,
+      order_note: orderNote,
+      // order_tags: { additionalProp: "string" },
+      // order_splits: [{ vendor_id: "1", amount: "2" }],
+    },
+  };
+
+  axios
+    .request(options)
+    .then(function (response) {
+      res.json(response.data);
+    })
+    .catch(function (error) {
+      console.error(error);
+      return res.status(400).json({
+        error: "Something went wrong. Please try again",
+        message: error.response.data.message,
+      });
+    });
+};
+
+exports.viewOrder = (req, res) => {
+  const order_id = req.params.order_id;
+  const cashfree_options = {
+    url:
+      process.env.ENVIRONMENT === "DEV"
+        ? process.env.DEV_CASHFREE_URL
+        : process.env.PROD_CASHFREE_URL,
+    appid:
+      process.env.ENVIRONMENT === "DEV"
+        ? process.env.DEV_CASHFREE_APPID
+        : process.env.PROD_CASHFREE_APPID,
+    clientsecret:
+      process.env.ENVIRONMENT === "DEV"
+        ? process.env.DEV_CASHFREE_SECRET_KEY
+        : process.env.CASHFREE_SECRET_KEY,
+  };
+  const { url, appid, clientsecret } = cashfree_options;
+
+  const myUrl = url + "/" + order_id;
+  console.log(myUrl);
+
+  const options = {
+    method: "GET",
+    url: myUrl,
+    headers: {
+      Accept: "application/json",
+      "x-api-version": "2022-01-01",
+      "x-client-id": appid,
+      "x-client-secret": clientsecret,
+    },
+  };
+
+  axios
+    .request(options)
+    .then(function (response) {
+      res.json(response.data);
+    })
+    .catch(function (error) {
+      return res.status(400).json({
+        error: "Something went wrong. Please try again",
+        message: error.response.data.message,
+      });
+    });
 };
 
 // sendgrid for email npm i @sendgrid/mail
