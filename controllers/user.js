@@ -231,9 +231,12 @@ exports.addInfluencerProducts = async (req, res) => {
     .map((user) => user.user_id)
     .indexOf(req.profile._id);
   if (userIndex === -1) {
+    const op1 = current_product.price / 10;
+    const op2 = 40;
+
     const obj = {
       user_id: req.profile._id,
-      margin: 0,
+      margin: op1 > op2 ? op1 : op2,
     };
     current_product.influencer_list.push(obj);
     await current_product.save();
