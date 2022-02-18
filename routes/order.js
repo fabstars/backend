@@ -15,19 +15,19 @@ const {
   orderById,
   updateOrderStatus,
   createOrderCashfree,
-  viewOrder
+  viewOrder,
 } = require("../controllers/order");
 const { decreaseQuantity } = require("../controllers/product");
 
-// Buying a product by the customer
-router.post(
-  "/order/create/:slug",
-  addOrderToUserHistory,
-  isCustomer,
-  create
-);
+// // Buying a product by the customer
+// router.post(
+//   "/order/create/:slug",
+//   addOrderToUserHistory,
+//   isCustomer,
+//   create
+// );
 
-router.post("/order/cashfree/create/:userId", createOrderCashfree);
+router.post("/order/cashfree/create/:slug", createOrderCashfree);
 
 router.get("/order/cashfree/:order_id", viewOrder);
 

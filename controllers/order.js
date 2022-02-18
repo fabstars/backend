@@ -6,15 +6,25 @@ const formidable = require("formidable");
 const axios = require("axios");
 
 exports.createOrderCashfree = async (req, res) => {
-  const {
+  const { creator, products, amount, cust_details } = req.body.order;
+
+  const orderAmount = amount,
+    orderCurrency = "INR",
+    orderNote = cust_details.order_note,
+    customerEmail = cust_details.email,
+    customerName = cust_details.fullName,
+    customerPhone = cust_details.mobileNumber;
+
+  console.log(
     orderAmount,
     orderCurrency,
     orderNote,
     customerEmail,
     customerName,
-    customerPhone,
-    customerId,
-  } = req.body;
+    customerPhone
+  );
+
+  const customerId = crypto.randomBytes(16).toString("hex");
 
   const orderId = crypto.randomBytes(16).toString("hex");
 
