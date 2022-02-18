@@ -66,7 +66,9 @@ exports.create = async (req, res) => {
         const uploadedResponse = await cloudinary.uploader.upload(myImg, {
           upload_preset: "q9pohyai",
         });
-        product.url = uploadedResponse.url;
+        const splitted = uploadedResponse.url.split("upload");
+        const myUrl = splitted[0] + "upload/q_60" + splitted[1];
+        product.url = myUrl;
       } catch (error) {
         console.log("Unable to upload");
       }
