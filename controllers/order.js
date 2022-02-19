@@ -4,17 +4,32 @@ var crypto = require("crypto");
 const { PaymentGateway } = require("@cashfreepayments/cashfree-sdk");
 const formidable = require("formidable");
 const axios = require("axios");
+const User = require("../models/user");
 
 exports.createOrderCashfree = async (req, res) => {
-  const {
+  const { creator, products, amount, cust_details } = req.body.order;
+
+  const orderAmount = amount,
+    orderCurrency = "INR",
+    orderNote = cust_details.order_note,
+    customerEmail = cust_details.email,
+    customerName = cust_details.fullName,
+    customerPhone = cust_details.mobileNumber;
+
+  const influencer = await User.findOne({ slug: creator });
+
+  console.log(influencer);
+
+  console.log(
     orderAmount,
     orderCurrency,
     orderNote,
     customerEmail,
     customerName,
-    customerPhone,
-    customerId,
-  } = req.body;
+    customerPhone
+  );
+
+  const customerId = influencer._id;
 
   const orderId = crypto.randomBytes(16).toString("hex");
 
@@ -38,9 +53,17 @@ exports.createOrderCashfree = async (req, res) => {
       process.env.ENVIRONMENT === "DEV"
         ? process.env.DEV_CASHFREE_SECRET_KEY
         : process.env.CASHFREE_SECRET_KEY,
+    return_url:
+      process.env.ENVIRONMENT === "DEV"
+        ? process.env.DEV_RETURN_URL
+        : process.env.PROD_RETURN_URL,
+    notify_url:
+      process.env.ENVIRONMENT === "DEV"
+        ? process.env.DEV_NOTIFY_URL
+        : process.env.PROD_NOTIFY_URL,
   };
 
-  const { url, appid, clientsecret } = cashfree_options;
+  const { url, appid, clientsecret, return_url, notify_url } = cashfree_options;
 
   const options = {
     method: "POST",
@@ -66,8 +89,8 @@ exports.createOrderCashfree = async (req, res) => {
         customer_name: customerName,
       },
       order_meta: {
-        return_url: `https://fabstores.co?order_id={order_id}&order_token={order_token}`,
-        notify_url: `https://fabstores.co?order_id={order_id}&order_token={order_token}`,
+        return_url: return_url,
+        notify_url: notify_url,
       },
       order_expiry_time: expiry,
       order_note: orderNote,
@@ -79,6 +102,7 @@ exports.createOrderCashfree = async (req, res) => {
   axios
     .request(options)
     .then(function (response) {
+      // Store the order_id, cf_order_id and address in the database
       res.json(response.data);
     })
     .catch(function (error) {
