@@ -7,6 +7,74 @@ const axios = require("axios");
 const User = require("../models/user");
 const Customer = require("../models/customer");
 
+exports.createOrderCod = async (req, res) => {
+  const { creator, products, amount, cust_details } = req.body.order;
+
+  const orderAmount = amount,
+    orderCurrency = "INR",
+    orderNote = cust_details.order_note,
+    customerEmail = cust_details.email,
+    customerName = cust_details.fullName,
+    customerPhone = cust_details.mobileNumber;
+
+  const cust_address = {
+    address: cust_details.address,
+    city: cust_details.city,
+    state: cust_details.state,
+    pincode: cust_details.pincode,
+  };
+
+  const cust = {
+    name: customerName,
+    email: customerEmail,
+    cust_address: cust_address,
+    mobile: customerPhone,
+  };
+
+  const c = await Customer.find({ email: customerEmail });
+
+  var current_customer;
+
+  if (c.length === 0) {
+    current_customer = new Customer(cust);
+  } else {
+    current_customer = c[0];
+    current_customer.name = cust.name;
+    current_customer.cust_address = cust.cust_address;
+    current_customer.mobile = cust.mobile;
+  }
+
+  await current_customer.save();
+
+  const influencer = await User.findOne({ slug: creator });
+
+  const customerId = current_customer._id;
+
+  const myOrder = new Order({
+    products: products,
+    amount: orderAmount,
+    user: customerId,
+  });
+
+  const current_order = await myOrder.save();
+  const orderId = current_order._id;
+
+  current_customer.history.push(orderId);
+
+  await current_customer.save();
+
+  current_order.transaction_id = orderId;
+
+  current_order.save((err, order) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(order);
+    }
+    res.json({ order, current_customer, influencer });
+  });
+};
+
 exports.createOrderCashfree = async (req, res) => {
   const { creator, products, amount, cust_details } = req.body.order;
 
