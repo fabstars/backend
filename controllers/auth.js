@@ -11,7 +11,7 @@ exports.signup = async (req, res) => {
     const current_user = users[i];
     if (current_user.slug === slug) {
       return res.status(400).json({
-        error: "Username already exists",
+        error: "That username is taken. Try another.",
       });
     }
   }
@@ -20,7 +20,7 @@ exports.signup = async (req, res) => {
     if (err) {
       return res.status(400).json({
         // error: errorHandler(err)
-        error: "Email is taken",
+        error: "That email is taken.",
       });
     }
     // generate a signed token with user id and secret
