@@ -5,6 +5,7 @@ const { PaymentGateway } = require("@cashfreepayments/cashfree-sdk");
 const formidable = require("formidable");
 const axios = require("axios");
 const User = require("../models/user");
+const Customer = require("../models/customer");
 
 exports.createOrderCashfree = async (req, res) => {
   const { creator, products, amount, cust_details } = req.body.order;
@@ -16,22 +17,44 @@ exports.createOrderCashfree = async (req, res) => {
     customerName = cust_details.fullName,
     customerPhone = cust_details.mobileNumber;
 
+  const cust_address = {
+    address: cust_details.address,
+    city: cust_details.city,
+    state: cust_details.state,
+    pincode: cust_details.pincode,
+  };
+
+  const cust = {
+    name: customerName,
+    email: customerEmail,
+    cust_address: cust_address,
+    mobile: customerPhone,
+  };
+
+  const c = await Customer.find({ email: customerEmail });
+
+  var current_customer;
+
+  if (c.length === 0) {
+    current_customer = new Customer(cust);
+  } else {
+    current_customer = c[0];
+    current_customer.name = cust.name;
+    current_customer.cust_address = cust.cust_address;
+    current_customer.mobile = cust.mobile;
+  }
+
+  await current_customer.save();
+
   const influencer = await User.findOne({ slug: creator });
 
-  console.log(influencer);
+  const customerId = current_customer._id;
 
-  console.log(
-    orderAmount,
-    orderCurrency,
-    orderNote,
-    customerEmail,
-    customerName,
-    customerPhone
-  );
-
-  const customerId = influencer._id;
-
-  const orderId = crypto.randomBytes(16).toString("hex");
+  const myOrder = new Order({
+    products: products,
+    amount: orderAmount,
+    user: customerId,
+  });
 
   Date.prototype.addHours = function (h) {
     this.setHours(this.getHours() + h);
@@ -65,6 +88,28 @@ exports.createOrderCashfree = async (req, res) => {
 
   const { url, appid, clientsecret, return_url, notify_url } = cashfree_options;
 
+  const current_order = await myOrder.save();
+  const orderId = current_order._id;
+
+  current_customer.history.push(orderId);
+
+  await current_customer.save();
+
+  console.log(influencer);
+
+  console.log(
+    orderAmount,
+    orderCurrency,
+    orderNote,
+    customerEmail,
+    customerName,
+    customerPhone
+  );
+
+  console.log(current_customer);
+
+  console.log(current_order);
+
   const options = {
     method: "POST",
     url: url,
@@ -94,7 +139,7 @@ exports.createOrderCashfree = async (req, res) => {
       },
       order_expiry_time: expiry,
       order_note: orderNote,
-      // order_tags: { additionalProp: "string" },
+      order_tags: { influencerSlug: creator },
       // order_splits: [{ vendor_id: "1", amount: "2" }],
     },
   };
@@ -103,7 +148,15 @@ exports.createOrderCashfree = async (req, res) => {
     .request(options)
     .then(function (response) {
       // Store the order_id, cf_order_id and address in the database
-      res.json(response.data);
+      current_order.transaction_id = response.data.cf_order_id;
+      current_order.save((err, order) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(order);
+        }
+        res.json(response.data);
+      });
     })
     .catch(function (error) {
       console.error(error);
@@ -114,8 +167,9 @@ exports.createOrderCashfree = async (req, res) => {
     });
 };
 
-exports.viewOrder = (req, res) => {
+exports.viewOrder = async (req, res) => {
   const order_id = req.params.order_id;
+
   const cashfree_options = {
     url:
       process.env.ENVIRONMENT === "DEV"
@@ -146,10 +200,21 @@ exports.viewOrder = (req, res) => {
     },
   };
 
+  const current_order = await Order.findById(order_id);
+
   axios
     .request(options)
     .then(function (response) {
-      res.json(response.data);
+      // console.log(typeof response.data.customer_details.customer_id);
+      Customer.findById(response.data.customer_details.customer_id).then(
+        (current_cust) => {
+          res.json({
+            cf_order_details: response.data,
+            current_order,
+            current_cust,
+          });
+        }
+      );
     })
     .catch(function (error) {
       return res.status(400).json({
