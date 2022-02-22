@@ -7,6 +7,29 @@ const axios = require("axios");
 const User = require("../models/user");
 const Customer = require("../models/customer");
 
+exports.cancelOrder = async (req, res) => {
+  const { order, cust } = req.body;
+  const cf_order_id = order.transaction_id;
+  const order_id = order._id;
+  const cust_id = cust._id;
+  const customer = await Customer.findById(cust_id);
+  const products = order.products;
+  const removeIdx = customer.history.map((id) => id).indexOf(order_id);
+  if (removeIdx !== -1) {
+    customer.history.splice(removeIdx, 1);
+    await customer.save();
+  }
+  try {
+    await Order.findByIdAndRemove(order_id);
+  } catch (err) {
+    return res.status(400).json({
+      error: "Unable to remove",
+      message: error.response.data.message,
+    });
+  }
+  return res.json(products);
+};
+
 exports.createOrderCod = async (req, res) => {
   const { creator, products, amount, cust_details } = req.body.order;
 

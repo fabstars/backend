@@ -17,6 +17,7 @@ const {
   createOrderCashfree,
   viewOrder,
   createOrderCod,
+  cancelOrder
 } = require("../controllers/order");
 const { decreaseQuantity } = require("../controllers/product");
 
@@ -33,6 +34,8 @@ router.post("/order/cashfree/create/:slug", createOrderCashfree);
 router.post("/order/cod/create/:slug", createOrderCod);
 
 router.get("/order/cashfree/:order_id", viewOrder);
+
+router.post("/order/cancel", cancelOrder);
 
 // Fetching all orders by a user
 router.get("/order/list/:userId", requireSignin, isAuth, isAdmin, listOrders);
