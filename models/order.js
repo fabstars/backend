@@ -7,7 +7,11 @@ const CartItemSchema = new mongoose.Schema(
     product: { type: ObjectId, ref: "Product" },
     name: String,
     price: Number,
-    count: Number
+    url: String,
+    count: {
+      type: Number,
+      default: 1,
+    },
   },
   { timestamps: true }
 );
@@ -17,16 +21,12 @@ const CartItem = mongoose.model("CartItem", CartItemSchema);
 const OrderSchema = new mongoose.Schema(
   {
     products: [CartItemSchema],
-    transaction_id: {},
-    amount: { type: Number },
-    address: String,
-    status: {
+    transaction_id: {
       type: String,
-      default: "Not processed",
-      enum: ["Not processed", "Processing", "Shipped", "Delivered", "Cancelled"] // enum means string objects
+      default: "",
     },
-    updated: Date,
-    user: { type: ObjectId, ref: "User" }
+    amount: { type: Number },
+    user: { type: ObjectId, ref: "Customer" },
   },
   { timestamps: true }
 );
